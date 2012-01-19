@@ -45,7 +45,7 @@ end
 
 class Rake::RemoteTask < Rake::Task
 
-  VERSION = "2.0.5"
+  VERSION = "2.0.6"
 
   if RUBY_PLATFORM =~ /java/
     require 'rake/remote_task/open3'
