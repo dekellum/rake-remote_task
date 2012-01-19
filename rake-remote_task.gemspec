@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.description = "Vlad the Deployer's sexy brainchild is rake-remote_task, extending\nRake with remote task goodness."
   s.email = ["ryand-ruby@zenspider.com", "drbrain@segment7.net", "wilson@supremetyrant.com"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.txt"]
-  s.files = [".autotest", "History.txt", "Manifest.txt", "README.txt", "Rakefile", "lib/rake/remote_task.rb", "lib/rake/test_case.rb", "lib/rake/remote_task/open3.rb", "lib/rake/remote_task/open4.rb", "test/test_rake_remote_task.rb", ".gemtest"]
+  s.files = [ "History.txt", "Manifest.txt", "README.txt", "Rakefile", "lib/rake/remote_task.rb", "lib/rake/test_case.rb", "lib/rake/remote_task/open3.rb", "lib/rake/remote_task/open4.rb", "test/test_rake_remote_task.rb" ]
   s.homepage = "https://github.com/seattlerb/rake-remote_task"
   s.rdoc_options = ["--main", "README.txt"]
   s.require_paths = ["lib"]
