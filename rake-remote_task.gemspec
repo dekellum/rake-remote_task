@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.summary = "Vlad the Deployer's sexy brainchild is rake-remote_task, extending Rake with remote task goodness."
   s.test_files = ["test/test_rake_remote_task.rb"]
 
-  s.add_runtime_dependency(%q<rake>, ["< 11.0", ">= 0.8"]
+  s.add_runtime_dependency(%q<rake>, ["< 11.0", ">= 0.8"])
   s.add_development_dependency(%q<hoe>, ["~> 3.3"])
 
   if RUBY_PLATFORM !~ /java/
