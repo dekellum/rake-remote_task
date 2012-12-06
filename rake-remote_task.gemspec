@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = "rake-remote_task"
-  s.version = "2.0.6"
+  s.version = "2.1.0"
 
   if RUBY_PLATFORM =~ /java/
     s.platform = Gem::Platform.new([nil, "java", nil])
@@ -17,12 +17,12 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--main", "README.txt"]
   s.require_paths = ["lib"]
   s.rubyforge_project = "hitsquad"
-  s.rubygems_version = "1.8.11"
+  s.rubygems_version = "1.8.24"
   s.summary = "Vlad the Deployer's sexy brainchild is rake-remote_task, extending Rake with remote task goodness."
   s.test_files = ["test/test_rake_remote_task.rb"]
 
-  s.add_runtime_dependency(%q<rake>, ["~> 0.8"])
-  s.add_development_dependency(%q<hoe>, ["~> 2.12"])
+  s.add_runtime_dependency(%q<rake>, ["< 11.0", ">= 0.8"]
+  s.add_development_dependency(%q<hoe>, ["~> 3.3"])
 
   if RUBY_PLATFORM !~ /java/
     s.add_runtime_dependency( 'open4', [ '~> 1.0' ] )
