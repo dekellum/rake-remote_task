@@ -8,7 +8,7 @@ $-w = true if $TRACE # asshat, don't mess with my warn.
 
 [
  ["Thread.current[:task]", :get, :put, :rsync, :run, :sudo, :target_host],
- ["Rake::RemoteTask",      :host, :remote_task, :role, :set]
+ ["Rake::RemoteTask",      :host, :remote_task, :role, :set, :append]
 ].each do |methods|
   receiver = methods.shift
   methods.each do |method|
@@ -45,7 +45,7 @@ end
 
 class Rake::RemoteTask < Rake::Task
 
-  VERSION = "2.0.6"
+  VERSION = "2.1.0"
 
   if RUBY_PLATFORM =~ /java/
     require 'rake/remote_task/open3'
@@ -198,6 +198,10 @@ class Rake::RemoteTask < Rake::Task
     @@env
   end
 
+  def self.is_array
+    @@is_array
+  end
+
   ##
   # Fetches environment variable +name+ from the environment using
   # default +default+.
@@ -207,11 +211,21 @@ class Rake::RemoteTask < Rake::Task
     if @@env.has_key? name then
       protect_env(name) do
         v = @@env[name]
-        v = @@env[name] = v.call if Proc === v unless per_thread[name]
-        v = v.call if Proc === v
+        if @@is_array[name] then
+          v = v.map do |item|
+            Proc === item ? item.call : item
+          end
+          unless per_thread[name] then
+            @@env[name] = v
+            @@is_array[name] = false
+          end
+        elsif Proc === v then
+          v = v.call
+          @@env[name] = v unless per_thread[name]
+        end
         v
       end
-    elsif default || default == false
+    elsif default || default == false then
       v = @@env[name] = default
     else
       raise Rake::FetchError
@@ -291,6 +305,7 @@ class Rake::RemoteTask < Rake::Task
   def self.reset
     @@def_role_hash = {}                # official default role value
     @@env           = {}
+    @@is_array      = {}
     @@tasks         = {}
     @@roles         = Hash.new { |h,k| h[k] = @@def_role_hash }
     @@env_locks     = Hash.new { |h,k| h[k] = Mutex.new }
@@ -373,6 +388,35 @@ class Rake::RemoteTask < Rake::Task
   end
 
   ##
+  # Append +value+ or +default_block+ to  environment variable +name+
+  #
+  # To initialize an empty array, just do append +name+
+  #
+  # If +default_block+ is defined, the block will be executed the
+  # first time the variable is fetched, and the value will be used for
+  # every subsequent fetch.
+
+  def self.append name, value = nil, &default_block
+    raise ArgumentError, "cannot provide both a value and a block" if
+      value and default_block unless
+      value == :per_thread
+    raise ArgumentError, "cannot set reserved name: '#{name}'" if
+      Rake::RemoteTask.reserved_name?(name) unless $TESTING
+
+    name = name.to_s
+
+    set(name, []) unless @@is_array[name]
+    Rake::RemoteTask.is_array[name] = true
+    Rake::RemoteTask.per_thread[name] ||= default_block && value == :per_thread
+
+    v = default_block || value
+    if v then
+      Rake::RemoteTask.default_env[name] << v
+      Rake::RemoteTask.env[name] << v
+    end
+  end
+
+  ##
   # Sets all the default values. Should only be called once. Use reset
   # if you need to restore values.
 
@@ -397,11 +441,13 @@ class Rake::RemoteTask < Rake::Task
                :sudo_cmd,           "sudo",
                :sudo_flags,         ['-p Password:'],
                :sudo_prompt,        /^Password:/,
-               :umask,              '02',
+               :umask,              nil,
                :mkdirs,             [],
                :shared_paths,       {},
                :perm_owner,         nil,
                :perm_group,         nil)
+
+    append :command_prefix, []
 
     set(:current_release)    { File.join(releases_path, releases[-1]) }
     set(:latest_release)     {
